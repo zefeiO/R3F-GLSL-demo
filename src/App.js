@@ -1,82 +1,34 @@
-import * as THREE from "three";
-import React, { useState, useMemo} from "react";
-import { Canvas, extend} from "@react-three/fiber";
-import { shaderMaterial} from "@react-three/drei";
-import glsl from "babel-plugin-glsl/macro";
-import "./styles.scss";
+import React, { useEffect, useRef } from "react";
+import { Canvas } from "@react-three/fiber";
 
-const DemoShaderMaterial = shaderMaterial(
-  // Uniform
-  {
-    uTexture: new THREE.Texture()
-  },
-  // Vertex Shader
-  glsl`
-    precision mediump float;
- 
-    varying vec2 vUv;
-
-    void main() {
-      vUv = uv;
-
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);  
-    }
-  `,
-  // Fragment Shader
-  glsl`
-    precision mediump float;
-
-    uniform sampler2D uTexture;
-    varying vec2 vUv;
-
-    void main() {
-      vec3 texture = texture2D(uTexture, vUv).rgb;
-      gl_FragColor.rgba = vec4(texture, 1.0); 
-    }
-  `
-);
-
-extend({ DemoShaderMaterial });
+import { NeuralTextureQuad } from "./NeuralTextureQuad";
+import { OrthographicCamera } from "@react-three/drei";
 
 
-const Rectangle = () => {
-  const [textureData, setTextureData] = useState(() => {
-    const data = new Uint8Array(4 * 32 * 32);
-    for (let i = 0; i < 32 * 32; ++i) {
-      data[4 * i] = data[4 * i + 1] = data[4 * i + 2] = 255;
-      data[4 * i + 3] = 1;
-    }
-    return data;
-  });
+const left = -window.innerWidth / 2;
+const right = window.innerWidth / 2;
+const top = -window.innerHeight / 2;
+const bottom = window.innerHeight / 2;
+const near = -100;
+const far = 100;
 
-  const tex = useMemo(() => {
-    const tex = new THREE.DataTexture(textureData, 32, 32, THREE.RGBAFormat, THREE.UnsignedByteType);
-    tex.needsUpdate = true;
-    return tex;
-  }, [textureData])
-
-
-  return (
-    <mesh>
-      <planeGeometry args={[0.4, 0.6, 16, 16]} />
-      <demoShaderMaterial uTexture={tex} />
-    </mesh>
-  );
-};
-
-const Scene = () => {
-  return (
-    <Canvas camera={{ fov: 12, position: [0, 0, 5] }}>
-      <Rectangle />
-    </Canvas>
-  );
-};
 
 const App = () => {
+  const canvasRef = useRef();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    // Set the canvas to full screen
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }, []);
+
   return (
-    <>
-      <Scene />
-    </>
+    <Canvas ref={canvasRef} style={{ width: '100%', height: '100%' }}>
+      <OrthographicCamera args={[left, right, top, bottom, near, far]} makeDefault={true} />
+      <NeuralTextureQuad />
+    </Canvas>
   );
 };
 
