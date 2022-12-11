@@ -10,7 +10,7 @@ export function NeuralTextureQuad() {
 
     // create scenes
     const [scene] = useState(() => new THREE.Scene());
-    const [perspectiveCamera, setPerspectiveCamera] = useState(() => {
+    const [perspectiveCamera] = useState(() => {
         const fieldOfView = 45;
         const screenAspect = window.innerWidth / window.innerHeight;
         const near = 0.1;
@@ -65,7 +65,7 @@ export function NeuralTextureQuad() {
                     <OrbitControls camera={perspectiveCamera} makeDefault />
                     <mesh>
                         <positionNormalMaterial />
-                        <torusKnotGeometry args={ [0.5, 0.2, 128, 32] } />
+                        <geometryOBJ attach={"geometry"} args={ ["output.obj"] } />
                     </mesh>
                 </>,
                 scene
